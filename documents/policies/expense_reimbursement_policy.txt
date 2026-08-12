@@ -1,0 +1,7 @@
+Expense Reimbursement Policy
+
+Employees may claim reimbursement for approved business-related expenses, including travel, client 
+meals, and work-related software subscriptions. All claims must be submitted within 30 days of the 
+expense, along with valid receipts, through the finance portal. Claims exceeding 5000 rupees require 
+prior written approval from a department head. Reimbursements are typically processed within 10 
+working days of approval.
