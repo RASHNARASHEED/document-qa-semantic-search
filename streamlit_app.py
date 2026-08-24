@@ -1,5 +1,5 @@
 import streamlit as st
-from app import load_documents, chunk_text, build_vector_store, search, get_embedding
+from app import load_documents, chunk_text, build_vector_store, search, get_embedding, generate_answer
 
 st.title("Document Q&A - Semantic Search")
 
@@ -20,26 +20,26 @@ query = st.text_input("Ask a question about the policies:")
 
 if query:
     results = search(collection, query, top_k=3)
+    answer, chunks = generate_answer(results, query)
 
-    for i in range(len(results["documents"][0])):
-        chunk_text_result = results["documents"][0][i]
-        distance = results["distances"][0][i]
-        metadata = results["metadatas"][0][i]
+    st.subheader("Answer")
+    st.write(answer)
 
-        st.write(f"**Result {i+1}** — source: `{metadata['source']}` — distance: `{distance:.4f}`")
-        st.write(chunk_text_result)
-        st.write("---")
+    with st.expander("Show retrieved chunks (for verification)"):
+        for i in range(len(results["documents"][0])):
+            chunk_text_result = results["documents"][0][i]
+            distance = results["distances"][0][i]
+            metadata = results["metadatas"][0][i]
+            st.write(f"**Result {i+1}** — source: `{metadata['source']}` — distance: `{distance:.4f}`")
+            st.write(chunk_text_result)
+            st.write("---")
 
 st.write("---")
 st.subheader("Upload a new document")
-
 uploaded_file = st.file_uploader("Choose a .txt file", type=["txt"])
-
 if uploaded_file is not None:
     file_text = uploaded_file.read().decode("utf-8")
-
     new_chunks = chunk_text(file_text, uploaded_file.name)
-
     for chunk in new_chunks:
         vector = get_embedding(chunk["text"])
         collection.add(
@@ -48,5 +48,4 @@ if uploaded_file is not None:
             metadatas=[{"source": chunk["source"], "chunk_id": chunk["chunk_id"]}],
             ids=[f"{chunk['source']}_{chunk['chunk_id']}"]
         )
-
     st.success(f"Added {uploaded_file.name} — {len(new_chunks)} chunks indexed.")
